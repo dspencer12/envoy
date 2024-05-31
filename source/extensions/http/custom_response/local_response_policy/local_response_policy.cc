@@ -78,7 +78,8 @@ Envoy::Http::FilterHeadersStatus LocalResponsePolicy::encodeHeaders(
   const auto mutate_headers = [this, encoder_callbacks](Envoy::Http::ResponseHeaderMap& headers) {
     header_parser_->evaluateHeaders(headers, encoder_callbacks->streamInfo());
   };
-  const absl::optional<std::string>& details = encoder_callbacks->streamInfo().responseCodeDetails();
+  const absl::optional<std::string>& details =
+      encoder_callbacks->streamInfo().responseCodeDetails();
   encoder_callbacks->sendLocalReply(code, body, mutate_headers, absl::nullopt,
                                     details.has_value() ? *details : "");
   return Envoy::Http::FilterHeadersStatus::StopIteration;

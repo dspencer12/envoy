@@ -76,8 +76,8 @@ TEST_F(CustomResponseFilterTest, LocalData) {
   ::Envoy::Http::TestResponseHeaderMapImpl response_headers{{":status", "401"}};
   EXPECT_EQ(filter_->decodeHeaders(request_headers, false),
             ::Envoy::Http::FilterHeadersStatus::Continue);
-  EXPECT_CALL(encoder_callbacks_,
-              sendLocalReply(static_cast<::Envoy::Http::Code>(499), "not allowed", _, _, *statusDetails));
+  EXPECT_CALL(encoder_callbacks_, sendLocalReply(static_cast<::Envoy::Http::Code>(499),
+                                                 "not allowed", _, _, *statusDetails));
   ON_CALL(encoder_callbacks_.stream_info_, getRequestHeaders())
       .WillByDefault(Return(&request_headers));
   ON_CALL(encoder_callbacks_.stream_info_, responseCodeDetails())

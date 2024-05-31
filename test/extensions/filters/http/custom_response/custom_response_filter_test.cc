@@ -17,6 +17,7 @@
 #include "utility.h"
 
 using testing::Return;
+using testing::ReturnRef;
 
 namespace Envoy {
 namespace Extensions {
@@ -70,14 +71,17 @@ TEST_F(CustomResponseFilterTest, LocalData) {
   setupFilterAndCallback();
 
   setServerName("server1.example.foo");
+  const auto statusDetails = absl::optional<std::string>("via_upstream");
   ::Envoy::Http::TestRequestHeaderMapImpl request_headers{};
   ::Envoy::Http::TestResponseHeaderMapImpl response_headers{{":status", "401"}};
   EXPECT_EQ(filter_->decodeHeaders(request_headers, false),
             ::Envoy::Http::FilterHeadersStatus::Continue);
   EXPECT_CALL(encoder_callbacks_,
-              sendLocalReply(static_cast<::Envoy::Http::Code>(499), "not allowed", _, _, _));
+              sendLocalReply(static_cast<::Envoy::Http::Code>(499), "not allowed", _, _, *statusDetails));
   ON_CALL(encoder_callbacks_.stream_info_, getRequestHeaders())
       .WillByDefault(Return(&request_headers));
+  ON_CALL(encoder_callbacks_.stream_info_, responseCodeDetails())
+      .WillByDefault(ReturnRef(statusDetails));
   EXPECT_EQ(filter_->encodeHeaders(response_headers, true),
             ::Envoy::Http::FilterHeadersStatus::StopIteration);
 }
